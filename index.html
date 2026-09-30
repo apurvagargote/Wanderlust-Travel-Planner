@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="referrer" content="no-referrer"/>
+  <title>Wanderlust – Travel Planner</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/layout.css"/>
+  <link rel="stylesheet" href="css/base.css"/>
+  <link rel="stylesheet" href="css/sections.css"/>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo"><i class="fas fa-compass"></i> Wanderlust</div>
+    <ul class="nav-links">
+      <li><a href="#destinations">Explore</a></li>
+      <li><a href="#itinerary">Itinerary</a></li>
+      <li><a href="#weather">Weather</a></li>
+      <li><a href="#budget">Budget</a></li>
+      <li><a href="#currency">Currency</a></li>
+      <li><a href="#favorites">Favorites <span class="fav-count" id="favCount">0</span></a></li>
+    </ul>
+    <div class="nav-toggle" id="navToggle"><i class="fas fa-bars"></i></div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-overlay"></div>
+    <div class="hero-slideshow" id="heroSlideshow"></div>
+    <div class="hero-content">
+      <p class="hero-sub">Discover Your Next Adventure</p>
+      <h1 class="hero-title">Where Do You Want<br/>To <span class="highlight">Wander</span>?</h1>
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" id="heroSearch" placeholder="Search destinations, countries, experiences..."/>
+        <button onclick="searchDestinations()">Explore</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span>500+</span><p>Destinations</p></div>
+        <div class="stat"><span>120+</span><p>Countries</p></div>
+        <div class="stat"><span>50K+</span><p>Travelers</p></div>
+      </div>
+    </div>
+    <div class="scroll-indicator"><i class="fas fa-chevron-down"></i></div>
+  </section>
+
+  <!-- DESTINATIONS -->
+  <section class="section" id="destinations">
+    <div class="section-header">
+      <h2>Explore <span class="highlight">Destinations</span></h2>
+      <p>Hand-picked places for every kind of traveler</p>
+    </div>
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterDest('all', this)">All</button>
+      <button class="filter-btn" onclick="filterDest('beach', this)"><i class="fas fa-umbrella-beach"></i> Beach</button>
+      <button class="filter-btn" onclick="filterDest('mountain', this)"><i class="fas fa-mountain"></i> Mountain</button>
+      <button class="filter-btn" onclick="filterDest('city', this)"><i class="fas fa-city"></i> City</button>
+      <button class="filter-btn" onclick="filterDest('adventure', this)"><i class="fas fa-hiking"></i> Adventure</button>
+      <button class="filter-btn" onclick="filterDest('cultural', this)"><i class="fas fa-landmark"></i> Cultural</button>
+    </div>
+    <div class="destinations-grid" id="destinationsGrid"></div>
+  </section>
+
+  <!-- ITINERARY BUILDER -->
+  <section class="section dark-section" id="itinerary">
+    <div class="section-header">
+      <h2>Build Your <span class="highlight">Itinerary</span></h2>
+      <p>Plan your perfect trip day by day</p>
+    </div>
+    <div class="itinerary-container">
+      <div class="itinerary-form glass-card">
+        <h3><i class="fas fa-plus-circle"></i> Add Activity</h3>
+        <input type="text" id="tripName" placeholder="Trip name (e.g. Paris Getaway)"/>
+        <input type="date" id="tripDate"/>
+        <input type="text" id="tripActivity" placeholder="Activity (e.g. Eiffel Tower visit)"/>
+        <select id="tripCategory">
+          <option value="sightseeing">🏛️ Sightseeing</option>
+          <option value="food">🍽️ Food & Dining</option>
+          <option value="adventure">🧗 Adventure</option>
+          <option value="relaxation">🧘 Relaxation</option>
+          <option value="shopping">🛍️ Shopping</option>
+          <option value="transport">✈️ Transport</option>
+        </select>
+        <input type="text" id="tripNotes" placeholder="Notes (optional)"/>
+        <button class="btn-primary" onclick="addItineraryItem()"><i class="fas fa-plus"></i> Add to Itinerary</button>
+      </div>
+      <div class="itinerary-list" id="itineraryList">
+        <div class="empty-state"><i class="fas fa-map-marked-alt"></i><p>Your itinerary is empty.<br/>Start adding activities!</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WEATHER -->
+  <section class="section" id="weather">
+    <div class="section-header">
+      <h2>Check <span class="highlight">Weather</span></h2>
+      <p>Know before you go</p>
+    </div>
+    <div class="weather-container">
+      <div class="weather-search glass-card">
+        <h3><i class="fas fa-cloud-sun"></i> Weather Lookup</h3>
+        <div class="weather-input-row">
+          <input type="text" id="weatherCity" placeholder="Enter city name..." onkeypress="if(event.key==='Enter') getWeather()"/>
+          <button class="weather-search-btn" onclick="getWeather()"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="quick-cities">
+          <span>Quick:</span>
+          <button onclick="quickWeather('Paris')">Paris</button>
+          <button onclick="quickWeather('Tokyo')">Tokyo</button>
+          <button onclick="quickWeather('Bali')">Bali</button>
+          <button onclick="quickWeather('New York')">New York</button>
+          <button onclick="quickWeather('Dubai')">Dubai</button>
+        </div>
+      </div>
+      <div class="weather-result glass-card" id="weatherResult">
+        <div class="weather-placeholder"><i class="fas fa-cloud-sun-rain"></i><p>Search a city to see weather</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUDGET ESTIMATOR -->
+  <section class="section dark-section" id="budget">
+    <div class="section-header">
+      <h2>Budget <span class="highlight">Estimator</span></h2>
+      <p>Plan your finances before you fly</p>
+    </div>
+    <div class="budget-container">
+      <div class="budget-form glass-card">
+        <h3><i class="fas fa-wallet"></i> Trip Budget Planner</h3>
+        <div class="budget-row">
+          <label>Destination</label>
+          <input type="text" id="budgetDest" placeholder="e.g. Paris, France"/>
+        </div>
+        <div class="budget-row">
+          <label>Number of Days</label>
+          <input type="number" id="budgetDays" placeholder="7" min="1" max="365"/>
+        </div>
+        <div class="budget-row">
+          <label>Travelers</label>
+          <input type="number" id="budgetPeople" placeholder="2" min="1" max="20"/>
+        </div>
+        <div class="budget-row">
+          <label>Travel Style</label>
+          <select id="budgetStyle">
+            <option value="budget">🎒 Budget Backpacker</option>
+            <option value="mid" selected>✈️ Mid-Range Traveler</option>
+            <option value="luxury">💎 Luxury Explorer</option>
+          </select>
+        </div>
+        <div class="budget-items">
+          <h4>Custom Expenses</h4>
+          <div id="budgetItemsList"></div>
+          <div class="add-expense-row">
+            <input type="text" id="expenseName" placeholder="Expense name"/>
+            <input type="number" id="expenseAmount" placeholder="Amount ($)"/>
+            <button onclick="addExpense()"><i class="fas fa-plus"></i></button>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="calculateBudget()"><i class="fas fa-calculator"></i> Calculate Budget</button>
+      </div>
+      <div class="budget-result glass-card" id="budgetResult">
+        <div class="weather-placeholder"><i class="fas fa-piggy-bank"></i><p>Fill in details to estimate your budget</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CURRENCY CONVERTER -->
+  <section class="section currency-section" id="currency">
+    <div class="currency-bg-particles" id="currencyParticles"></div>
+    <div class="section-header">
+      <h2>Currency <span class="highlight">Converter</span></h2>
+      <p>Convert money instantly for your next destination</p>
+    </div>
+
+    <!-- MAIN CONVERTER HERO -->
+    <div class="currency-hero-card glass-card">
+      <div class="currency-hero-glow"></div>
+      <div class="currency-hero-inner">
+
+        <!-- Amount input -->
+        <div class="chero-amount-wrap">
+          <label class="chero-label">You Send</label>
+          <div class="chero-amount-field">
+            <span class="chero-symbol" id="fromSymbol">$</span>
+            <input type="number" id="currencyAmount" value="100" min="0" oninput="convertCurrency()"/>
+          </div>
+        </div>
+
+        <!-- From -->
+        <div class="chero-select-wrap">
+          <label class="chero-label">From</label>
+          <div class="chero-select-inner">
+            <span class="chero-flag" id="fromFlag">🇺🇸</span>
+            <select id="fromCurrency" onchange="convertCurrency()"></select>
+          </div>
+        </div>
+
+        <!-- Swap -->
+        <button class="chero-swap" onclick="swapCurrencies()" title="Swap">
+          <i class="fas fa-exchange-alt"></i>
+        </button>
+
+        <!-- To -->
+        <div class="chero-select-wrap">
+          <label class="chero-label">To</label>
+          <div class="chero-select-inner">
+            <span class="chero-flag" id="toFlag">🇪🇺</span>
+            <select id="toCurrency" onchange="convertCurrency()"></select>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div class="chero-result">
+          <label class="chero-label">You Get</label>
+          <div class="chero-result-amount" id="resultAmount">—</div>
+          <div class="chero-result-rate" id="resultRate"></div>
+        </div>
+
+      </div>
+
+      <!-- Quick pairs strip -->
+      <div class="chero-quick-strip">
+        <span><i class="fas fa-bolt"></i> Quick:</span>
+        <button onclick="setQuickPair('USD','EUR')">🇺🇸 USD → EUR 🇪🇺</button>
+        <button onclick="setQuickPair('USD','JPY')">🇺🇸 USD → JPY 🇯🇵</button>
+        <button onclick="setQuickPair('USD','GBP')">🇺🇸 USD → GBP 🇬🇧</button>
+        <button onclick="setQuickPair('EUR','INR')">🇪🇺 EUR → INR 🇮🇳</button>
+        <button onclick="setQuickPair('USD','AED')">🇺🇸 USD → AED 🇦🇪</button>
+        <button onclick="setQuickPair('GBP','JPY')">🇬🇧 GBP → JPY 🇯🇵</button>
+      </div>
+    </div>
+
+    <!-- RATE BOARD -->
+    <div class="currency-wrapper">
+      <div class="currency-board glass-card">
+        <h3><i class="fas fa-chart-line"></i> Live Rate Board</h3>
+        <div class="rate-board" id="rateBoard"></div>
+        <p class="rate-note"><i class="fas fa-info-circle"></i> Indicative rates only. Verify with your bank before travel.</p>
+      </div>
+
+      <!-- Destination currency tips -->
+      <div class="currency-tips-card glass-card">
+        <h3><i class="fas fa-map-marker-alt"></i> Destination Tips</h3>
+        <div class="dest-currency-list">
+          <div class="dest-currency-item" onclick="setQuickPair('USD','JPY')">
+            <span class="dest-flag">🇯🇵</span>
+            <div class="dest-info"><strong>Japan</strong><span>Cash preferred · ATMs widely available</span></div>
+            <span class="dest-code">JPY</span>
+          </div>
+          <div class="dest-currency-item" onclick="setQuickPair('USD','EUR')">
+            <span class="dest-flag">🇫🇷</span>
+            <div class="dest-info"><strong>France</strong><span>Cards accepted everywhere</span></div>
+            <span class="dest-code">EUR</span>
+          </div>
+          <div class="dest-currency-item" onclick="setQuickPair('USD','IDR')">
+            <span class="dest-flag">🇮🇩</span>
+            <div class="dest-info"><strong>Bali</strong><span>Carry cash for local markets</span></div>
+            <span class="dest-code">IDR</span>
+          </div>
+          <div class="dest-currency-item" onclick="setQuickPair('USD','AED')">
+            <span class="dest-flag">🇦🇪</span>
+            <div class="dest-info"><strong>Dubai</strong><span>Cards & cash both common</span></div>
+            <span class="dest-code">AED</span>
+          </div>
+          <div class="dest-currency-item" onclick="setQuickPair('USD','THB')">
+            <span class="dest-flag">🇹🇭</span>
+            <div class="dest-info"><strong>Thailand</strong><span>Exchange at airports or banks</span></div>
+            <span class="dest-code">THB</span>
+          </div>
+          <div class="dest-currency-item" onclick="setQuickPair('USD','MXN')">
+            <span class="dest-flag">🇲🇽</span>
+            <div class="dest-info"><strong>Mexico</strong><span>Pesos preferred for local shops</span></div>
+            <span class="dest-code">MXN</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- FAVORITES -->
+  <section class="section" id="favorites">
+    <div class="section-header">
+      <h2>Your <span class="highlight">Favorites</span></h2>
+      <p>Places you've saved for later</p>
+    </div>
+    <div class="favorites-grid" id="favoritesGrid">
+      <div class="empty-state full-width"><i class="fas fa-heart"></i><p>No favorites yet.<br/>Click the heart on any destination!</p></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><i class="fas fa-compass"></i> Wanderlust</div>
+      <p>Made with <i class="fas fa-heart" style="color:#ff6b6b"></i> for explorers everywhere</p>
+      <div class="footer-links">
+        <a href="#home">Home</a>
+        <a href="#destinations">Explore</a>
+        <a href="#itinerary">Itinerary</a>
+        <a href="#budget">Budget</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal-card" id="modalCard" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+    <img id="lightboxImg" src="" alt=""/>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- JavaScript — data first, then features, then init -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/favorites.js"></script>
+  <script src="js/destinations.js"></script>
+  <script src="js/itinerary.js"></script>
+  <script src="js/weather.js"></script>
+  <script src="js/budget.js"></script>
+  <script src="js/currency.js"></script>
+  <script src="js/hero.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
